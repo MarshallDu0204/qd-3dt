@@ -1,0 +1,50 @@
+Monocular Quasi-Dense 3D Object Tracking
+
+此次只讨论3D Object pose 的生成部分
+
+基础网络:
+
+Resnet 101 Backbone
+
+RPN
+
+RPN to ROI (ROI align)
+
+对于每个输出的ROI
+
+分别计算
+
+1. 输入ROI 通过一个简化的卷积网络生成 cls_score 与 regr
+
+                                 /-> cls convs -> cls fcs -> cls
+ROI -> shared convs -> shared fcs
+                                 \-> reg convs -> reg fcs -> reg
+
+
+2. 输入ROI 与1产生的bbox 通过一个多头的，结构与1非常类似的多头网络产生三维特征
+具体运算步骤
+输入 ROI
+
+                                 /->convs ->fcs -> depth
+ROI -> shared convs -> shared fcs
+                                 \->convs ->fcs -> dim
+
+                                 \->convs ->fcs -> rotation
+
+                                 \->convs ->fcs -> cen_2d_pred
+
+接下来通过1中计算的bbox 与 cen_2d_pred 来计算新的 cen_2d_pred， 从而达到修正 cen_2d_pred 的效果
+
+即最后三维bbox的中心计算需要1中bbox 与 2中网络的cen_2d_pred的计算结果共同生成
+
+其余三维bbox的特征皆可通过2中的网络独立运算得出
+
+ROI实际被输入到了两个子分支网络中
+
+延申：
+
+Quasi-Dense Similarity Learning for Multiple Object Tracking 
+
+https://arxiv.org/abs/2006.06664
+
+Github: https://github.com/SysCV/qdtrack
